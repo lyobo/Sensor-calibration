@@ -1,0 +1,6 @@
+sheetname = Sheet1
+date_column = 2
+time_column = 3
+min_column = 5
+max_column = 6
+average_column =  4

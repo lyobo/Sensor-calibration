@@ -1,0 +1,7 @@
+K = k
+B = b
+MSE = MSE
+R2 = RSQUARE
+COLUMN_1S = 18
+COLUMN_2S_1 = 9
+COLUMN_2S_2 = 3

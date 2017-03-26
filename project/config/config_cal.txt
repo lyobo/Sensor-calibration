@@ -1,0 +1,7 @@
+设置数据开始列
+data_start = 8
+数据结束列
+data_end = 25
+column_1s = 18
+column_2s_1 = 9
+column_2s_2 = 3
