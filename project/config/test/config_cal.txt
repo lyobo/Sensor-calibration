@@ -4,4 +4,6 @@ data_start = 8
 data_end = 25
 column_1s = 18
 column_2s_1 = 9
-column_2s_2 = 3
+column_2s_2 = 6
+
+node_2s_1 = 20,102,104

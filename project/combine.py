@@ -34,16 +34,28 @@ class CombineWindow(QDialog, combine_window.Ui_Dialog):
         self.select_2 = []
 
     def openday1(self):
+        u'''
+        获得day1数据
+        :return:
+        '''
         full_file = QFileDialog.getOpenFileName(self, u"打开表格", guiPath, "table(*.xls)")
         if full_file is not u"":
             self.day1Edit.setText(full_file)
 
     def openday2(self):
+        u'''
+        获取day2数据
+        :return:
+        '''
         full_file = QFileDialog.getOpenFileName(self, u"打开表格", guiPath, "table(*.xls)")
         if full_file is not u"":
             self.day2Edit.setText(full_file)
 
     def combine(self):
+        u'''
+        结合两个文件
+        :return:
+        '''
         file_path = QFileDialog.getSaveFileName(self, 'save file', "saveFile", "excel files(*.xls)")
         if file_path is u'':
             return 0
@@ -56,17 +68,31 @@ class CombineWindow(QDialog, combine_window.Ui_Dialog):
             cols = table_1.ncols
             for i in range(rows):
                 for j in range(cols):
-                    if table_1.cell_value(i,j) ==u'':
+                    if table_1.cell_value(i,j) == u'':
                         data = self.get_data(table_1,table_2,i,j)
                         table_k.write(i,j,data)
                     else:
-                        data = table_1.cell_value(i,j)
-                        table_k.write(i,j,data)
+                        try:
+                            data1 = float(table_1.cell_value(i,j))
+                            data2 = float(self.get_data(table_1,table_2,i,j))
+                            data = (data1 + data2)/2
+                            table_k.write(i,j,data)
+                        except:
+                            data = table_1.cell_value(i,j)
+                            table_k.write(i,j,data)
 
         file.save(file_path)
         QMessageBox.information(self,u'提示',u"操作成功")
 
     def get_data(self,table1,table2,i,j):
+        u'''
+        获取数据
+        :param table1:
+        :param table2:
+        :param i:
+        :param j:
+        :return:
+        '''
         nodes = table1.cell_value(i,0)
         data = u''
         for m in range(len(self.common_node)):
@@ -76,6 +102,10 @@ class CombineWindow(QDialog, combine_window.Ui_Dialog):
         return data
 
     def enable(self):
+        u'''
+        激活exportnode选项
+        :return:
+        '''
         if os.path.isfile(self.day1Edit.text()) and os.path.isfile(self.day2Edit.text()):
             self.warningLabel1.setText(u'')
             self.combineButton.setEnabled(True)
@@ -96,6 +126,11 @@ class CombineWindow(QDialog, combine_window.Ui_Dialog):
                 self.warningLabel2.setText(u'')
 
     def openfile(self,day_index):
+        u'''
+        打开文件
+        :param day_index:
+        :return:
+        '''
         if day_index == 1:
             self.data_day1 = xlrd.open_workbook(self.day1Edit.text())
             element_day1 = self.data_day1.sheet_names()
@@ -126,6 +161,10 @@ class CombineWindow(QDialog, combine_window.Ui_Dialog):
                 return 1
 
     def getnode_array(self):
+        u'''
+        获取公共结点
+        :return:
+        '''
         node_2s_1 = []
         node_2s_2 = []
         table_day1_k = self.data_day1.sheet_by_name(self.element[1])
@@ -143,7 +182,7 @@ class CombineWindow(QDialog, combine_window.Ui_Dialog):
         :return:
         '''
         element = []
-        file = open("config\config_combine.txt", "r")
+        file = open("config\export_config.txt", "r")
         line = "start reading"
         while (1):
             if (line == ""):
@@ -158,7 +197,16 @@ class CombineWindow(QDialog, combine_window.Ui_Dialog):
                 element.append(split[1].strip())
             if split[0].strip().upper() == 'R2':
                 element.append(split[1].strip())
-            if split[0].strip().upper() == 'COLUMN_1S':
+        file.close()
+
+        file = open("config\data_config.txt", "r")
+        line = "start reading"
+        while (1):
+            if (line == ""):
+                break
+            line = file.readline()
+            split = line.strip().split("=")
+            if split[0].strip().upper() == 'COLUMN_1S_1':
                 self.column_1s = int(split[1].strip())
             if split[0].strip().upper() == 'COLUMN_2S_1':
                 self.column_2s_1 = int(split[1].strip())

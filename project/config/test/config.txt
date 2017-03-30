@@ -1,0 +1,24 @@
+﻿设置数据开始列
+data_start = 8
+数据结束列
+data_end = 25
+以某点为基准的时间计算值
+time = 30
+year = 2
+month = 3
+day = 4
+hour = 5
+minute = 6
+second = 7
+交集的向前阈值（单位：10秒）
+threshold_start = 12
+交集的向后阈值(单位：10秒)
+threshold_end = 12
+
+COLUMN_1S_1 = 18
+COLUMN_1S_2 = 6
+
+COLUMN_2S_1 = 9
+COLUMN_2S_2 = 6
+
+node_2s_1 = 20,102,104

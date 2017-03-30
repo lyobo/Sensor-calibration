@@ -5,7 +5,6 @@
 #
 # the module is to initalize the GUI
 
-
 from qgis.core import *
 from qgis.gui import *
 from PyQt4.QtGui import *
@@ -15,7 +14,6 @@ import os
 import xlrd
 import xlwt
 import numpy as np
-from scipy.optimize import leastsq
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas # matplotlib对PyQt4的支持
 from matplotlib.figure import Figure
 from matplotlib.dates import DateFormatter
@@ -53,7 +51,6 @@ class UIWindow(QDialog,new_window.Ui_Calibration):
         self._select_sheets = []
         self.flag = 0
         self.para_path = u""
-        self.twosidesnode_list = []
 
     def _createFigures(self):
         u'''
@@ -116,37 +113,45 @@ class UIWindow(QDialog,new_window.Ui_Calibration):
         node_name = self.nodeBox.currentText()
         if node_name.isdigit():
             self._table = self._data.sheet_by_name(node_name)
-            column_list = range(self.data_start,self.data_end + 1, 2)
-            for i in column_list:
-                col_temp = self._table.col_values(i)
-                if col_temp.count(0) != len(col_temp):
-                    self.sensorBox.addItem(u"%s"%((i - self.data_start + 2) / 2))
+            if node_name in self.cir_2:
+                column_list = range(1,self.column_2s_2 / 2 + 1)
+                for i in column_list:
+                    self.sensorBox.addItem(u'%s'%i)
+            else:
+                column_list = range(self.data_start,self.data_end + 1, 2)
+                for i in column_list:
+                    col_temp = self._table.col_values(i)
+                    if col_temp.count(0) != len(col_temp):
+                        self.sensorBox.addItem(u"%s"%((i - self.data_start + 2) / 2))
 
     def setChannelBox(self):
         u'''
         对可选通道初始化
         :return:
         '''
-        self.channelBox.clear()
-        self.channelBox.addItem(u"--请选择通道")
         node_index = self.nodeBox.currentText()
         sensor_name = self.sensorBox.currentText()
+        self.groupBox_2.setEnabled(True)
         if sensor_name.isdigit():
-            if node_index in self.twosidesnode_list:
+            if node_index in self.rec_2:
                 self.flag = 1
-                self.channelBox.setEnabled(False)
                 self._column_index = self.data_start + int(str(sensor_name)) - 1
                 self._time_list(0, self._table.nrows)
                 self._illumination_list(0, self._table.nrows, 2)
                 self._updateFigure(self.year_flag1, self.month_flag1, self.day_flag1, self.time_list_flag1,
                                    self.illumination_list_flag1, 7, 19)
-                self.groupBox_2.setEnabled(True)
+                self.setTimeComboBox()
+            elif node_index in self.cir_2:
+                self.flag = 1
+                self._column_index = self.data_start + int(str(sensor_name)) - 1
+                self._time_list(0,self._table.nrows)
+                self._illumination_list(0,self._table.nrows,2)
+                self._updateFigure(self.year_flag1, self.month_flag1, self.day_flag1, self.time_list_flag1,
+                                   self.illumination_list_flag1, 7, 19)
+                self.setTimeComboBox()
             else:
                 self.flag = 0
-                self.channelBox.setEnabled(True)
-                self.channelBox.addItem(u"可见光")
-                self.channelBox.addItem(u"近红外")
-                self.groupBox_2.setEnabled(False)
+                self.getColumnIndex()
 
     def getColumnIndex(self):
         u'''
@@ -154,7 +159,7 @@ class UIWindow(QDialog,new_window.Ui_Calibration):
         :return:
         '''
         sensor_index = self.sensorBox.currentText()
-        channel_index = self.channelBox.currentText()
+        channel_index = u"可见光"
         if sensor_index.isdigit():
             if channel_index == u"可见光":
                 self.flag = 1
@@ -162,12 +167,7 @@ class UIWindow(QDialog,new_window.Ui_Calibration):
                 self._time_list(0, self._table.nrows)
                 self._illumination_list(0,self._table.nrows,1)
                 self._updateFigure(self.year_flag1, self.month_flag1, self.day_flag1, self.time_list_flag1, self.illumination_list_flag1,7,19)
-            elif channel_index == u"近红外":
-                self.flag = 1
-                self._column_index = 2 * int(str(sensor_index)) + self.data_start - 1
-                self._time_list(0, self._table.nrows)
-                self._illumination_list(0, self._table.nrows, 1)
-                self._updateFigure(self.year_flag1, self.month_flag1, self.day_flag1, self.time_list_flag1, self.illumination_list_flag1, 7,19)
+                self.setTimeComboBox()
             else:
                 self.flag = 0
 
@@ -189,7 +189,6 @@ class UIWindow(QDialog,new_window.Ui_Calibration):
         self._ax.set_xlabel("time", fontdict=Font)
         self._ax.set_ylabel("intensity of illumination(Lx)", fontdict=Font)
         self._canvas.draw()
-        self.setTimeComboBox()
 
     def _time_list(self, start, end):
         column = self._column_index
@@ -217,21 +216,31 @@ class UIWindow(QDialog,new_window.Ui_Calibration):
             self.illumination_list_flag1 = illumination_list
         if type == 2:
             col1 = self._column_index
-            col_temp = self._table.col_values(col1 + 9,start,end)
+            col_temp = self._table.col_values(col1 + self.column_2s_1,start,end)
             if col_temp.count(0) == len(col_temp):
-                col2 = col1 + 3
+                col2 = col1 + self.column_2s_2
             else:
-                col2 = self._column_index + 9
-            illumination_list = []
+                col2 = self._column_index + self.column_2s_1
+            illumination_list1 = []
+            illumination_list2 = []
+            time1 = []
+            time2 = []
             illumination_list_1 = self._table.col_values(col1, start, end)
             illumination_list_2 = self._table.col_values(col2, start, end)
             for i in range(len(illumination_list_1)):
                 if illumination_list_1[i] >= illumination_list_2[i]:
-                    illumination_list.append(illumination_list_1[i])
+                    illumination_list1.append(illumination_list_1[i])
+                    time1.append(self.time_list_flag1[i])
                 else:
-                    illumination_list.append(illumination_list_2[i])
-            self.illumination_list_flag1 = illumination_list
-            print self.illumination_list_flag1
+                    illumination_list2.append(illumination_list_2[i])
+                    time2.append(self.time_list_flag1[i])
+
+            if len(illumination_list1) > len(illumination_list2):
+                self.illumination_list_flag1 = illumination_list1
+                self.time_list_flag1 = time1
+            else:
+                self.illumination_list_flag1 = illumination_list2
+                self.time_list_flag1 = time2
 
     def setTimeComboBox(self):
         u'''
@@ -246,7 +255,6 @@ class UIWindow(QDialog,new_window.Ui_Calibration):
             for i in range(len(self._hourlist)):
                 self.starthourBox.addItem(u"%s" % int(self._hourlist[i]))
         elif self.flag == 2:
-            print " to be continune"
             self.starthourBox.clear()
             self.starthourBox.addItem(u"--开始（小时）")
             for i in range(len(self.hourstandard_list)):
@@ -389,16 +397,18 @@ class UIWindow(QDialog,new_window.Ui_Calibration):
             return 0
         column = self._column_index
         channel_list_1side = range(self.data_start,self.data_end + 1)
-        channel_list_2sides = range(self.data_start,self.data_start + (self.data_end - self.data_start + 1) / 2)
+        channel_list_2sides_rec = range(self.data_start,self.data_start + (self.data_end - self.data_start + 1) / 2)
+        channel_list_2sides_cir_1 = range(self.data_start,self.data_start + self.column_2s_2*2)
+        channel_list_2sides_cir_2 = range(self.data_start + self.column_2s_2 * 2 , self.data_end + 1)
         sheet_sort = sorted(self._select_sheets)
-        oneside,twosides,index1,index2 = self.splitSheet(sheet_sort)
+        oneside,rec,cir,index1,index2,index3 = self.splitSheet(sheet_sort)
         file = xlwt.Workbook()
         table_k = file.add_sheet("k",cell_overwrite_ok=True)
         table_b = file.add_sheet("b",cell_overwrite_ok=True)
         table_mse = file.add_sheet("MSE",cell_overwrite_ok=True)
         table_rsquare = file.add_sheet("RSQUARE",cell_overwrite_ok=True)
 
-        prog_max = len(self._select_sheets) + len(oneside) * len(channel_list_1side) + len(twosides) * len(channel_list_2sides) + 1
+        prog_max = len(self._select_sheets) + len(oneside) * len(channel_list_1side) + len(rec) * len(channel_list_2sides_rec) + len(cir) * len(channel_list_1side) + 1
         progdialog = QtGui.QProgressDialog(u"计算中...",u"取消",0,prog_max,self)
         progdialog.setWindowTitle(u"计算进度")
         progdialog.setWindowModality(QtCore.Qt.WindowModal)
@@ -416,7 +426,6 @@ class UIWindow(QDialog,new_window.Ui_Calibration):
                 progdialog.setValue(prog_id)
                 prog_id = prog_id + 1
 
-
         if self.flag == 1:
             if self._column_index is not None:
                 start, end = self._getSliceColumn()
@@ -430,6 +439,10 @@ class UIWindow(QDialog,new_window.Ui_Calibration):
             for j in channel_list_1side:
                 standard_array,temp_array = self.get_oneside_Array(start, end, oneside[i], j)
                 if temp_array.tolist().count(0) == len(temp_array):
+                    [k,b] = [u"None",u"None"]
+                    mse = u'None'
+                    r_square =u"None"
+                elif (j - self.data_start + 1) % 2 == 0:
                     [k,b] = [u"None",u"None"]
                     mse = u'None'
                     r_square =u"None"
@@ -447,14 +460,14 @@ class UIWindow(QDialog,new_window.Ui_Calibration):
                 progdialog.setValue(prog_id)
                 prog_id = prog_id + 1
 
-        for i in range(len(twosides)):
-            for j in channel_list_2sides:
+        for i in range(len(rec)):
+            for j in channel_list_2sides_rec:
                 if progdialog.wasCanceled():
                     return 0
                 progdialog.setValue(prog_id)
                 prog_id = prog_id + 1
                 try:
-                    (standard_array,temp_array,plus) = self.get_twosides_Array(start, end, twosides[i], j)
+                    (standard_array,temp_array,plus) = self.get_twosides_Array(start, end, rec[i], j)
                 except:
                     continue
                 if temp_array.tolist().count(0) == len(temp_array):
@@ -471,7 +484,45 @@ class UIWindow(QDialog,new_window.Ui_Calibration):
                 table_mse.write(int(index2[i]), j + 1 - self.data_start + plus, mse)
                 table_rsquare.write(int(index2[i]), j + 1 - self.data_start + plus, r_square)
 
-
+        for i in range(len(cir)):
+            for j in channel_list_2sides_cir_1:
+                if progdialog.wasCanceled():
+                    return 0
+                progdialog.setValue(prog_id)
+                prog_id = prog_id + 1
+                try:
+                    (standard_array, temp_array, plus) = self.get_twosides_Array(start, end, cir[i], j)
+                except:
+                    continue
+                if temp_array.tolist().count(0) == len(temp_array):
+                    [k,b] = [u"None",u"None"]
+                    mse = u'None'
+                    r_square =u"None"
+                if (j-self.data_start + 1)% 2 == 0:
+                    [k,b] = [u"None",u"None"]
+                    mse = u'None'
+                    r_square =u"None"
+                else:
+                    [k,b] = np.polyfit(temp_array, standard_array, 1)
+                    calculation = temp_array * k + b
+                    mse = self._mse(calculation, standard_array)
+                    r_square = self._r_square(calculation, standard_array)
+                table_k.write(int(index3[i]), j + 1 - self.data_start + plus, k)
+                table_b.write(int(index3[i]), j + 1 - self.data_start + plus, b)
+                table_mse.write(int(index3[i]), j + 1 - self.data_start + plus, mse)
+                table_rsquare.write(int(index3[i]), j + 1 - self.data_start + plus, r_square)
+            for j in channel_list_2sides_cir_2:
+                if progdialog.wasCanceled():
+                    return 0
+                progdialog.setValue(prog_id)
+                prog_id = prog_id + 1
+                [k, b] = [u"None", u"None"]
+                mse = u'None'
+                r_square = u"None"
+                table_k.write(int(index3[i]), j + 1 - self.data_start, k)
+                table_b.write(int(index3[i]), j + 1 - self.data_start, b)
+                table_mse.write(int(index3[i]), j + 1 - self.data_start, mse)
+                table_rsquare.write(int(index3[i]), j + 1 - self.data_start, r_square)
         file.save(file_path)
         prog_id = prog_id + 1
         progdialog.setValue(prog_id)
@@ -492,14 +543,19 @@ class UIWindow(QDialog,new_window.Ui_Calibration):
         index1 = []
         sheet2 = []
         index2 = []
+        sheet3 = []
+        index3 = []
         for i in range(len(sheet)):
-            if sheet[i] in self.twosidesnode_list:
+            if sheet[i] in self.rec_2:
                 sheet2.append(sheet[i])
                 index2.append(i)
+            elif sheet[i] in self.cir_2:
+                sheet3.append(sheet[i])
+                index3.append(i)
             else:
                 sheet1.append(sheet[i])
                 index1.append(i)
-        return sheet1,sheet2,index1,index2
+        return sheet1,sheet2,sheet3,index1,index2,index3
 
     def get_oneside_Array(self, start, end, name, column_temp):
         u'''
@@ -544,26 +600,44 @@ class UIWindow(QDialog,new_window.Ui_Calibration):
         index_flag = 0
         standard_list = []
         table_cal = self._data.sheet_by_name(name)
-        calbration_value_temp = []
+        calbration_value_temp_11 = []
+        calbration_value_temp_12 = []
+        time1 = []
+        time2 = []
         calbration_value_temp_1 = table_cal.col_values(column_temp)
         calbration_value_temp_2 = table_cal.col_values(self.data_end)
+        calbration_time_temp = table_cal.col_values(self.time_column)
         if calbration_value_temp_2.count(0) == len(calbration_value_temp_2):
-            calbration_value_temp_2 = table_cal.col_values(column_temp + 3)
+            calbration_value_temp_2 = table_cal.col_values(column_temp + self.column_2s_2)
             index_flag = 0
             if calbration_value_temp_2.count(0) == len(calbration_value_temp_2):
                 return np.array([]),np.array([])
         else:
-            calbration_value_temp_2 = table_cal.col_values(column_temp + 9)
+            calbration_value_temp_2 = table_cal.col_values(column_temp + self.column_2s_1)
             index_flag = 1
         for i in range(len(calbration_value_temp_1)):
             if calbration_value_temp_1[i] > calbration_value_temp_2[i]:
-                calbration_value_temp.append(calbration_value_temp_1[i])
+                calbration_value_temp_11 .append(calbration_value_temp_1[i])
+                time1.append(calbration_time_temp[i])
                 col1_gt_count = col1_gt_count + 1
             else:
-                calbration_value_temp.append(calbration_value_temp_2[i])
+                calbration_value_temp_12.append(calbration_value_temp_2[i])
+                time2.append(calbration_time_temp[i])
                 col2_gt_count = col2_gt_count + 1
-        calbration_time_temp = table_cal.col_values(self.time_column)
+
         calbration_list = []
+
+        if col1_gt_count >= col2_gt_count:
+            calbration_value_temp = calbration_value_temp_1
+            calbration_time_temp = time1
+            col_plus = 0
+        else:
+            calbration_value_temp = calbration_value_temp_2
+            calbration_time_temp = time2
+            if index_flag:
+                col_plus = int(self.column_2s_1)
+            else:
+                col_plus = int(self.column_2s_2)
 
         for i in range(len(standard_time_temp)):
             for j in range(len(calbration_time_temp)):
@@ -572,13 +646,7 @@ class UIWindow(QDialog,new_window.Ui_Calibration):
                     calbration_list.append(calbration_value_temp[j])
         standard_array = np.array(standard_list)
         calbration_array = np.array(calbration_list)
-        if col1_gt_count >= col2_gt_count:
-            col_plus = 0
-        else:
-            if index_flag:
-                col_plus = int(self.column_2s_1)
-            else:
-                col_plus = int(self.column_2s_2)
+
         return standard_array,calbration_array,col_plus
 
     def _mse(self, calculation, standard):
@@ -608,8 +676,8 @@ class UIWindow(QDialog,new_window.Ui_Calibration):
         '''
         if os.path.isfile(u"%s"%self.fileEdit.text()):
             self._data = xlrd.open_workbook(self.fileEdit.text())
-            self.twosidesNode.setEnabled(True)
             if self.twosidesnode_list != []:
+                self.get_node_type()
                 self.data_path = self.fileEdit.text()
                 self.setNodeBox()
                 self.groupBox.setEnabled(True)
@@ -623,7 +691,7 @@ class UIWindow(QDialog,new_window.Ui_Calibration):
         激活输出部分选项
         :return:
         '''
-        if self.channelBox.currentText() == u"可见光" or self.channelBox.currentText() == u"近红外":
+        if self.sensorBox.currentText().isdigit():
             self.groupBox_2.setEnabled(True)
         else:
             self.groupBox_2.setEnabled(False)
@@ -644,7 +712,7 @@ class UIWindow(QDialog,new_window.Ui_Calibration):
         读取配置文件，说明读取数据表格的格式
         :return:
         '''
-        file = open("config\\config.txt", "r")
+        file = open("config\\data_config.txt", "r")
         line = "start reading"
         while (1):
             if (line == ""):
@@ -673,12 +741,26 @@ class UIWindow(QDialog,new_window.Ui_Calibration):
                 self.threshold_start = int(split[1].strip())
             if split[0].strip() == "THRESHOLD_END":
                 self.threshold_end = int(split[1].strip())
-            if split[0].strip() == "COLUMN_1S":
-                self.column_1s = int(split[1].strip())
+            if split[0].strip() == "COLUMN_1S_1":
+                self.column_1s_1 = int(split[1].strip())
+            if split[0].strip() == 'COLUMN_1S_2':
+                self.column_1s_2 = int(split[1].strip())
             if split[0].strip() == "COLUMN_2S_1":
                 self.column_2s_1 = int(split[1].strip())
             if split[0].strip() == "COLUMN_2S_2":
                 self.column_2s_2 = int(split[1].strip())
+        file.close()
+
+        file = open("config\\2sides_config.txt", "r")
+        line = "start reading"
+        while (1):
+            if (line == ""):
+                break
+            line = file.readline()
+            split = line.strip().upper().split("=")
+            if split[0].strip() == "NODE_2S_1":
+                temp = split[1].strip()
+                self.twosidesnode_list = temp.strip().split(',')
         file.close()
 
     def openStandardDialog(self):
@@ -710,7 +792,7 @@ class UIWindow(QDialog,new_window.Ui_Calibration):
 
 
     def _readConfig_standard(self):
-        file = open("config\\config_standard.txt", "r")
+        file = open("config\\standard_config.txt", "r")
         line = "start reading"
         while(1):
             if line == "":
@@ -764,28 +846,25 @@ class UIWindow(QDialog,new_window.Ui_Calibration):
         self.time_list_flag2 = time_list
         self.illumination_list_flag2 = illumination_list
 
-    def open2sidesNode(self):
-        name_temp = self._data.sheet_names()
-        name_list = []
-        for i in range(len(name_temp)):
-            if name_temp[i].isdigit():
-                name_list.append(name_temp[i])
-        self.select_node = selectSheet.SelectWindow()
-        self.select_node.init_None()
-        self.select_node._get_namelist(name_list)
-        self.select_node.enable_sheet(self.twosidesnode_list)
-        self.select_node.show()
-        QtCore.QObject.connect(self.select_node.confirm, QtCore.SIGNAL(_fromUtf8("clicked()")), self.twonode_list)
-        QtCore.QObject.connect(self.select_node.confirm, QtCore.SIGNAL(_fromUtf8("clicked()")), self.enableGroup1)
-
-    def twonode_list(self):
-        u'''
-        获取select页面的用户选择
-        :return:
-        '''
-        self.twosidesnode_list = self.select_node.confirm_selection()
 
     def openCombine(self):
         self.combine = combine.CombineWindow()
         self.combine.getPath(self.para_path)
         self.combine.show()
+
+    def get_node_type(self):
+        self.rec_2 = self.twosidesnode_list
+        all_nodes = self._data.sheet_names()
+        self.cir_2 = []
+        for i in range(len(all_nodes)):
+            if all_nodes[i].isdigit():
+                table = self._data.sheet_by_name(all_nodes[i])
+                count = 0
+                for j in range(self.data_start,self.data_end + 1):
+                    col = table.col_values(j)
+                    if col.count(0) != len(col):
+                        count = count + 1
+                if count == self.column_2s_2 * 2:
+                    self.cir_2.append(all_nodes[i])
+            else:
+                continue

@@ -1,0 +1,4 @@
+K = k
+B = b
+MSE = MSE
+R2 = RSQUARE

@@ -15,6 +15,7 @@ import xlwt
 import numpy as np
 import cal_window
 import selectSheet
+
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
@@ -30,11 +31,10 @@ class CalWindow(QDialog, cal_window.Ui_Dialog):
         super(CalWindow,self).__init__()
         self.setupUi(self)
         self._select_sheets = []
-        self._readConfig()
         self.column_1s = None
         self.column_2s_1 = None
         self.column_2s_2 = None
-        self.element = self.read_file()
+        self.element = self._readConfig()
 
     def openPara(self):
         u'''
@@ -156,11 +156,14 @@ class CalWindow(QDialog, cal_window.Ui_Dialog):
             for j in channel_list:
                 k,b = self.getPara(self._select_sheets[i],j)
                 if k == u"None":
-                    break
-                if k == '':
+                    continue
+                if k == u'':
                     continue
                 ori_array = self.get_oriarray(self._select_sheets[i], j)
-                cal_array = k * ori_array + b
+                try:
+                    cal_array = k * ori_array + b
+                except:
+                    cal_array = np.array([])
                 cal_list = cal_array.tolist()
                 for k in range(len(cal_list)):
                     table.write(k,j-self.data_start,cal_list[k])
@@ -197,32 +200,34 @@ class CalWindow(QDialog, cal_window.Ui_Dialog):
         :return:
         '''
         table = self._data_data.sheet_by_name(u"%s"%node_name)
-        if int(node_name) in self.node_1:
+        ori_list = table.col_values(range_j)
+        '''
+        if int(node_name) in self.node_1 :
             ori_list = table.col_values(range_j)
-        elif int(node_name) in self.node_2_1:
+        elif int(node_name) in self.node_2_2 or int(node_name) in map(int, self.node_2_1):
             ori_1 = table.col_values(range_j)
-            if range_j > self.column_2s_1:
-                ori_2 = table.col_values(range_j - self.column_2s_1)
-            else:
-                ori_2 = table.col_values(range_j + self.column_2s_1)
-            ori_list = self.getmax(ori_1,ori_2)
-        elif int(node_name) in self.node_2_2:
-            ori_1 = table.col_values(range_j)
-            if range_j > self.column_2s_2:
+            if range_j - self.data_start > self.column_2s_2:
                 ori_2 = table.col_values(range_j - self.column_2s_1)
             else:
                 ori_2 = table.col_values(range_j + self.column_2s_2)
             ori_list = self.getmax(ori_1,ori_2)
+        '''
         ori_array = np.array(ori_list)
         return ori_array
 
     def getmax(self,list1,list2):
+        u'''
+        暂时没用
+        :param list1:
+        :param list2:
+        :return:
+        '''
         list = []
         for i in range(len(list1)):
-            if list1[i] > list2[i]:
+            if list1[i] >= list2[i]:
                 list.append(list1[i])
             else:
-                list.append(list2[i])
+                list.append(-30000)
         return list
 
     def get_parapath(self, para_path,data_path):
@@ -243,7 +248,7 @@ class CalWindow(QDialog, cal_window.Ui_Dialog):
         读取配置文件，说明读取数据表格的格式
         :return:
         '''
-        file = open("config\config_cal.txt", "r")
+        file = open("config\data_config.txt", "r")
         line = "start reading"
         while (1):
             if (line == ""):
@@ -254,32 +259,28 @@ class CalWindow(QDialog, cal_window.Ui_Dialog):
                 self.data_start = int(split[1].strip()) - 1
             if split[0].strip() == "DATA_END":
                 self.data_end = int(split[1].strip()) - 1
+            if split[0].strip().upper() == "COLUMN_1S_1":
+                self.column_1s = int(split[1].strip())
+            if split[0].strip().upper() == "COLUMN_2S_1":
+                self.column_2s_1 = int(split[1].strip())
+            if split[0].strip().upper() == "COLUMN_2S_2":
+                self.column_2s_2 = int(split[1].strip())
         file.close()
 
-    def node_split(self):
-        k = self._para_data.sheet_by_name(self.element[1])
-        node_1s = []
-        node_2s_1 = []
-        node_2s_2 = []
-        r = k.nrows
-        for i in range(r):
-            nodename = k.cell_value(i,0)
-            row = k.row_values(i)
-            # print row.count('')
-            if row.count('') == self.column_1s - self.column_1s:
-                node_1s.append(nodename)
-            elif row.count('') == self.column_1s - self.column_2s_1:
-                node_2s_1.append(nodename)
-            elif row.count('') == self.column_1s - self.column_2s_2:
-                node_2s_2.append(nodename)
+        file = open("config\\2sides_config.txt", "r")
+        line = "start reading"
+        while (1):
+            if (line == ""):
+                break
+            line = file.readline()
+            split = line.strip().upper().split("=")
+            if split[0].strip() == "NODE_2S_1":
+                temp = split[1].strip().split(',')
+                self.node_2_1 = temp
+        file.close()
 
-        self.node_1 = node_1s
-        self.node_2_1 = node_2s_1
-        self.node_2_2 = node_2s_2
-
-    def read_file(self):
         element = []
-        file = open("config\config_combine.txt", "r")
+        file = open("config\export_config.txt", "r")
         line = "start reading"
         while (1):
             if (line == ""):
@@ -294,14 +295,31 @@ class CalWindow(QDialog, cal_window.Ui_Dialog):
                 element.append(split[1].strip())
             if split[0].strip().upper() == 'R2':
                 element.append(split[1].strip())
-            if split[0].strip().upper() == "COLUMN_1S":
-                self.column_1s = int(split[1].strip())
-            if split[0].strip().upper() == "COLUMN_2S_1":
-                self.column_2s_1 = int(split[1].strip())
-            if split[0].strip().upper() == "COLUMN_2S_2":
-                self.column_2s_2 = int(split[1].strip())
         file.close()
+
         if len(element) is not 0:
             return element
         else:
             QMessageBox.critical(u'error', u'error in reading the config')
+
+    def node_split(self):
+        u'''
+        获得各种类型的结点编号
+        :return:
+        '''
+        k = self._para_data.sheet_by_name(self.element[1])
+        node_1s = []
+        node_2s_2 = []
+        r = k.nrows
+        for i in range(r):
+            nodename = k.cell_value(i,0)
+            row = k.row_values(i)
+            if row.count('') == self.column_1s - self.column_1s:
+                node_1s.append(nodename)
+            elif row.count('') == self.column_2s_2:
+                node_2s_2.append(nodename)
+
+        self.node_1 = node_1s
+        self.node_2_2 = node_2s_2
+
+

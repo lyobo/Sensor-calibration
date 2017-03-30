@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'new_window.ui'
 #
-# Created: Thu Mar 23 20:00:22 2017
+# Created: Mon Mar 27 13:15:50 2017
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -65,23 +65,19 @@ class Ui_Calibration(object):
         self.horizontalLayout = QtGui.QHBoxLayout(self.layoutWidget1)
         self.horizontalLayout.setMargin(0)
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
+        spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout.addItem(spacerItem)
         self.nodeBox = QtGui.QComboBox(self.layoutWidget1)
         self.nodeBox.setEditable(False)
         self.nodeBox.setObjectName(_fromUtf8("nodeBox"))
         self.nodeBox.addItem(_fromUtf8(""))
         self.horizontalLayout.addWidget(self.nodeBox)
-        spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
-        self.horizontalLayout.addItem(spacerItem)
+        spacerItem1 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout.addItem(spacerItem1)
         self.sensorBox = QtGui.QComboBox(self.layoutWidget1)
         self.sensorBox.setObjectName(_fromUtf8("sensorBox"))
         self.sensorBox.addItem(_fromUtf8(""))
         self.horizontalLayout.addWidget(self.sensorBox)
-        spacerItem1 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
-        self.horizontalLayout.addItem(spacerItem1)
-        self.channelBox = QtGui.QComboBox(self.layoutWidget1)
-        self.channelBox.setObjectName(_fromUtf8("channelBox"))
-        self.channelBox.addItem(_fromUtf8(""))
-        self.horizontalLayout.addWidget(self.channelBox)
         spacerItem2 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem2)
         self.layoutWidget2 = QtGui.QWidget(self.groupBox)
@@ -155,10 +151,6 @@ class Ui_Calibration(object):
         self.fileEdit = QtGui.QLineEdit(self.layoutWidget5)
         self.fileEdit.setObjectName(_fromUtf8("fileEdit"))
         self.horizontalLayout_2.addWidget(self.fileEdit)
-        self.twosidesNode = QtGui.QPushButton(self.layoutWidget5)
-        self.twosidesNode.setEnabled(False)
-        self.twosidesNode.setObjectName(_fromUtf8("twosidesNode"))
-        self.horizontalLayout_2.addWidget(self.twosidesNode)
 
         self.retranslateUi(Calibration)
         QtCore.QObject.connect(self.openButton, QtCore.SIGNAL(_fromUtf8("clicked()")), Calibration.openxlsx)
@@ -174,10 +166,8 @@ class Ui_Calibration(object):
         QtCore.QObject.connect(self.pushButton_2, QtCore.SIGNAL(_fromUtf8("clicked()")), Calibration.openCalDialog)
         QtCore.QObject.connect(self.nodeEdit, QtCore.SIGNAL(_fromUtf8("textChanged(QString)")), Calibration.openStandard)
         QtCore.QObject.connect(self.sensorBox, QtCore.SIGNAL(_fromUtf8("currentIndexChanged(QString)")), Calibration.setChannelBox)
-        QtCore.QObject.connect(self.channelBox, QtCore.SIGNAL(_fromUtf8("currentIndexChanged(QString)")), Calibration.getColumnIndex)
-        QtCore.QObject.connect(self.channelBox, QtCore.SIGNAL(_fromUtf8("currentIndexChanged(QString)")), Calibration.enableGroup2)
-        QtCore.QObject.connect(self.twosidesNode, QtCore.SIGNAL(_fromUtf8("clicked()")), Calibration.open2sidesNode)
         QtCore.QObject.connect(self.combineButton, QtCore.SIGNAL(_fromUtf8("clicked()")), Calibration.openCombine)
+        QtCore.QObject.connect(self.sensorBox, QtCore.SIGNAL(_fromUtf8("currentIndexChanged(QString)")), Calibration.enableGroup2)
         QtCore.QMetaObject.connectSlotsByName(Calibration)
 
     def retranslateUi(self, Calibration):
@@ -189,7 +179,6 @@ class Ui_Calibration(object):
         self.endminuteBox.setItemText(0, _translate("Calibration", "--结束（分钟）", None))
         self.nodeBox.setItemText(0, _translate("Calibration", "--请选择结点", None))
         self.sensorBox.setItemText(0, _translate("Calibration", "--请选择传感器", None))
-        self.channelBox.setItemText(0, _translate("Calibration", "--请选择通道", None))
         self.loadNodeButton.setText(_translate("Calibration", "从其他文件加载", None))
         self.groupBox_2.setTitle(_translate("Calibration", "输出选项", None))
         self.nodeButton.setText(_translate("Calibration", "--请选择结点", None))
@@ -198,5 +187,4 @@ class Ui_Calibration(object):
         self.combineButton.setText(_translate("Calibration", "合并双面数据", None))
         self.groupBox_3.setTitle(_translate("Calibration", "初始化", None))
         self.openButton.setText(_translate("Calibration", "打开表格", None))
-        self.twosidesNode.setText(_translate("Calibration", "双面节点选择", None))
 
