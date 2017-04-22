@@ -1,0 +1,23 @@
+totalColumn = 28
+aggregation = 1
+year = 2
+month = 3
+day = 4
+hour = 5
+minute = 6
+second = 7
+
+data_start = 8
+data_end = 25
+voltage = 26
+44column = 27
+node =  28
+
+
+standard_hour = 7
+standard_minute = 0
+standard_second = 0
+times = 10
+
+lon = 116.35964512825012
+lat = 39.96041193087462

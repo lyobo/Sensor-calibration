@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'new_window.ui'
 #
-# Created: Mon Mar 27 13:15:50 2017
+# Created: Sat Apr 22 14:52:23 2017
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,10 +26,10 @@ except AttributeError:
 class Ui_Calibration(object):
     def setupUi(self, Calibration):
         Calibration.setObjectName(_fromUtf8("Calibration"))
-        Calibration.resize(847, 743)
+        Calibration.resize(496, 627)
         self.groupBox = QtGui.QGroupBox(Calibration)
         self.groupBox.setEnabled(False)
-        self.groupBox.setGeometry(QtCore.QRect(150, 110, 471, 421))
+        self.groupBox.setGeometry(QtCore.QRect(10, 80, 471, 421))
         self.groupBox.setObjectName(_fromUtf8("groupBox"))
         self.frame = QtGui.QFrame(self.groupBox)
         self.frame.setEnabled(False)
@@ -94,7 +94,7 @@ class Ui_Calibration(object):
         self.horizontalLayout_6.addWidget(self.nodeEdit)
         self.groupBox_2 = QtGui.QGroupBox(Calibration)
         self.groupBox_2.setEnabled(False)
-        self.groupBox_2.setGeometry(QtCore.QRect(150, 540, 471, 61))
+        self.groupBox_2.setGeometry(QtCore.QRect(10, 510, 471, 61))
         self.groupBox_2.setObjectName(_fromUtf8("groupBox_2"))
         self.layoutWidget3 = QtGui.QWidget(self.groupBox_2)
         self.layoutWidget3.setGeometry(QtCore.QRect(10, 20, 461, 25))
@@ -110,7 +110,7 @@ class Ui_Calibration(object):
         spacerItem4 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_5.addItem(spacerItem4)
         self.layoutWidget4 = QtGui.QWidget(Calibration)
-        self.layoutWidget4.setGeometry(QtCore.QRect(150, 610, 471, 25))
+        self.layoutWidget4.setGeometry(QtCore.QRect(10, 580, 471, 25))
         self.layoutWidget4.setObjectName(_fromUtf8("layoutWidget4"))
         self.horizontalLayout_4 = QtGui.QHBoxLayout(self.layoutWidget4)
         self.horizontalLayout_4.setMargin(0)
@@ -137,7 +137,7 @@ class Ui_Calibration(object):
         spacerItem8 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_4.addItem(spacerItem8)
         self.groupBox_3 = QtGui.QGroupBox(Calibration)
-        self.groupBox_3.setGeometry(QtCore.QRect(150, 50, 471, 51))
+        self.groupBox_3.setGeometry(QtCore.QRect(10, 20, 471, 51))
         self.groupBox_3.setObjectName(_fromUtf8("groupBox_3"))
         self.layoutWidget5 = QtGui.QWidget(self.groupBox_3)
         self.layoutWidget5.setGeometry(QtCore.QRect(10, 20, 451, 25))
@@ -151,6 +151,9 @@ class Ui_Calibration(object):
         self.fileEdit = QtGui.QLineEdit(self.layoutWidget5)
         self.fileEdit.setObjectName(_fromUtf8("fileEdit"))
         self.horizontalLayout_2.addWidget(self.fileEdit)
+        self.openSplitButton = QtGui.QPushButton(self.layoutWidget5)
+        self.openSplitButton.setObjectName(_fromUtf8("openSplitButton"))
+        self.horizontalLayout_2.addWidget(self.openSplitButton)
 
         self.retranslateUi(Calibration)
         QtCore.QObject.connect(self.openButton, QtCore.SIGNAL(_fromUtf8("clicked()")), Calibration.openxlsx)
@@ -168,6 +171,7 @@ class Ui_Calibration(object):
         QtCore.QObject.connect(self.sensorBox, QtCore.SIGNAL(_fromUtf8("currentIndexChanged(QString)")), Calibration.setChannelBox)
         QtCore.QObject.connect(self.combineButton, QtCore.SIGNAL(_fromUtf8("clicked()")), Calibration.openCombine)
         QtCore.QObject.connect(self.sensorBox, QtCore.SIGNAL(_fromUtf8("currentIndexChanged(QString)")), Calibration.enableGroup2)
+        QtCore.QObject.connect(self.openSplitButton, QtCore.SIGNAL(_fromUtf8("clicked()")), Calibration.openSplit)
         QtCore.QMetaObject.connectSlotsByName(Calibration)
 
     def retranslateUi(self, Calibration):
@@ -187,4 +191,5 @@ class Ui_Calibration(object):
         self.combineButton.setText(_translate("Calibration", "合并双面数据", None))
         self.groupBox_3.setTitle(_translate("Calibration", "初始化", None))
         self.openButton.setText(_translate("Calibration", "打开表格", None))
+        self.openSplitButton.setText(_translate("Calibration", "原始文件预处理", None))
 

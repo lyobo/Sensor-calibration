@@ -23,6 +23,7 @@ import new_window
 import selectSheet
 import cal
 import combine
+import dialog
 
 # 像ui转py学习字符转码
 try:
@@ -868,3 +869,7 @@ class UIWindow(QDialog,new_window.Ui_Calibration):
                     self.cir_2.append(all_nodes[i])
             else:
                 continue
+
+    def openSplit(self):
+        self.solarWindow = dialog.MainWindow()
+        self.solarWindow.show()
