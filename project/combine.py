@@ -67,7 +67,8 @@ class CombineWindow(QDialog, combine_window.Ui_Dialog):
             rows = table_1.nrows
             cols = table_1.ncols
             for i in range(rows):
-                for j in range(cols):
+                table_k.write(i,0,table_1.cell_value(i,0))
+                for j in range(1,cols):
                     if table_1.cell_value(i,j) == u'':
                         data = self.get_data(table_1,table_2,i,j)
                         table_k.write(i,j,data)
@@ -97,8 +98,8 @@ class CombineWindow(QDialog, combine_window.Ui_Dialog):
         data = u''
         for m in range(len(self.common_node)):
             if nodes == self.common_node[m]:
-                index = m
-                data = table2.cell_value(m,j)
+                index = self.common_node_index[m]
+                data = table2.cell_value(index,j)
         return data
 
     def enable(self):
@@ -172,7 +173,7 @@ class CombineWindow(QDialog, combine_window.Ui_Dialog):
         node_1 = table_day1_k.col_values(0)
         node_2 = table_day2_k.col_values(0)
         self.common_node = [val for val in node_2 if val in node_1]
-        self.common_node_index = [node_1.index(val) for val in node_2 if val in node_1]
+        self.common_node_index = [node_2.index(val) for val in node_2 if val in node_1]
         if self.common_node == []:
             QMessageBox.critical(self,'error!',u'两个文件没有相同结点！')
 

@@ -403,6 +403,7 @@ class UIWindow(QDialog,new_window.Ui_Calibration):
         channel_list_2sides_cir_2 = range(self.data_start + self.column_2s_2 * 2 , self.data_end + 1)
         sheet_sort = sorted(self._select_sheets)
         oneside,rec,cir,index1,index2,index3 = self.splitSheet(sheet_sort)
+        print cir
         file = xlwt.Workbook()
         table_k = file.add_sheet("k",cell_overwrite_ok=True)
         table_b = file.add_sheet("b",cell_overwrite_ok=True)
